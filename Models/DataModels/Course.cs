@@ -20,9 +20,13 @@ namespace UniversityApiBackend.Models.DataModels
 
         [Required]
         public string Description { get; set; } = string.Empty;
+        [Required]
         public string TargetAudience { get; set; } = string.Empty;
+        [Required]
         public string Objectives { get; set; } = string.Empty;
+        [Required]
         public string Requirements { get; set; } = string.Empty;
+        [Required]
         public Level level { get; set; } = Level.Basic;
 
         [Required]
