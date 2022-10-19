@@ -8,11 +8,11 @@ using static UniversityApiBackend.Models.DataModels.Course;
 
 namespace UniversityApiBackend
 {
-    public class Services
+    public class Service
     {
         private readonly UniversityDBContext _context;
 
-        public Services(UniversityDBContext context)
+        public Service(UniversityDBContext context)
         {
             _context = context;
         }
