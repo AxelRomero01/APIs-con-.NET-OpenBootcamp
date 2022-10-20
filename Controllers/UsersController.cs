@@ -25,6 +25,10 @@ namespace UniversityApiBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             return await _context.Users.ToListAsync();
         }
 
@@ -32,6 +36,11 @@ namespace UniversityApiBackend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -78,6 +87,11 @@ namespace UniversityApiBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            if (_context.Users == null)
+            {
+                return Problem("Entity set 'UniversityDBContext.Users' is null.");
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -88,6 +102,11 @@ namespace UniversityApiBackend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
@@ -102,7 +121,7 @@ namespace UniversityApiBackend.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.Users.Any(user => user.Id == id);
+            return (_context.Users?.Any(user => user.Id == id)).GetValueOrDefault();
         }
     }
 }

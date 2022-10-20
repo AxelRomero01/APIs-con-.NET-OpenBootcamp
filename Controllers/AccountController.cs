@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using UniversityApiBackend.DataAccess;
 using UniversityApiBackend.Helpers;
 using UniversityApiBackend.Models.DataModels;
 
@@ -12,9 +12,11 @@ namespace UniversityApiBackend.Controllers
     public class AccountController : ControllerBase
     {
         private readonly JwtSettings _jwtsettings;
+        private readonly UniversityDBContext _context;
 
-        public AccountController(JwtSettings jwtsettings)
+        public AccountController(UniversityDBContext context, JwtSettings jwtsettings)
         {
+            _context = context;
             _jwtsettings = jwtsettings;
         }
 
@@ -23,7 +25,7 @@ namespace UniversityApiBackend.Controllers
             new User()
             {
                 Id = 1,
-                Email = "sergiogonzalezmerino@gmail.com",
+                Email = "axel@gmail.com",
                 Name = "Admin",
                 Password = "Admin"
             },
@@ -32,7 +34,7 @@ namespace UniversityApiBackend.Controllers
                 Id = 2,
                 Email = "pepe@gmail.com",
                 Name = "User1",
-                Password = "1234"
+                Password = "pepe"
             }
         };
 
