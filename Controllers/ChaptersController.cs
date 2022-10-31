@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,10 @@ namespace UniversityApiBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Chapter>>> GetChapters()
         {
+            if (_context.Chapters == null)
+            {
+                return NotFound();
+            }
             return await _context.Chapters.ToListAsync();
         }
 
@@ -32,6 +38,10 @@ namespace UniversityApiBackend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Chapter>> GetChapter(int id)
         {
+            if (_context.Chapters == null)
+            {
+                return NotFound();
+            }
             var chapter = await _context.Chapters.FindAsync(id);
 
             if (chapter == null)
@@ -78,6 +88,10 @@ namespace UniversityApiBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Chapter>> PostChapter(Chapter chapter)
         {
+            if (_context.Chapters == null)
+            {
+                return Problem("Entity set 'UniversityDbContext.Chapters'  is null.");
+            }
             _context.Chapters.Add(chapter);
             await _context.SaveChangesAsync();
 
@@ -88,6 +102,10 @@ namespace UniversityApiBackend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteChapter(int id)
         {
+            if (_context.Chapters == null)
+            {
+                return NotFound();
+            }
             var chapter = await _context.Chapters.FindAsync(id);
             if (chapter == null)
             {
@@ -102,7 +120,7 @@ namespace UniversityApiBackend.Controllers
 
         private bool ChapterExists(int id)
         {
-            return _context.Chapters.Any(e => e.Id == id);
+            return (_context.Chapters?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

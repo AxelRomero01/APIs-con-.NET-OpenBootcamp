@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using UniversityApiBackend.DataAccess;
 using UniversityApiBackend.Models.DataModels;
 using UniversityApiBackend.Services;
@@ -29,13 +32,21 @@ namespace UniversityApiBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            return await _context.Students.ToListAsync();
+            if (_context.Students == null)
+            {
+                return NotFound();
+            }
+            return await _context.Students.Include(s => s.Courses).ToListAsync();
         }
 
         // GET: api/Students/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
+            if (_context.Students == null)
+            {
+                return NotFound();
+            }
             var student = await _context.Students.FindAsync(id);
 
             if (student == null)
@@ -82,6 +93,10 @@ namespace UniversityApiBackend.Controllers
         [HttpPost]
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
+            if (_context.Students == null)
+            {
+                return Problem("Entity set 'UniversityDbContext.Students'  is null.");
+            }
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
 
@@ -92,6 +107,10 @@ namespace UniversityApiBackend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
+            if (_context.Students == null)
+            {
+                return NotFound();
+            }
             var student = await _context.Students.FindAsync(id);
             if (student == null)
             {
@@ -104,9 +123,27 @@ namespace UniversityApiBackend.Controllers
             return NoContent();
         }
 
+        [HttpGet("/api/Students/GetStudentsWithCourses")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Administrator")]
+        public async Task<IActionResult> GetStudentsWithCourses()
+        {
+
+            var students = _context.Students;
+
+            if (students == null) { return NoContent(); }
+
+
+            var studentsWithCourses = await students
+                .Where(x => x.Courses.Any())
+                .Include(x => x.Courses)
+                .ToListAsync();
+
+            return Ok(studentsWithCourses);
+        }
+
         private bool StudentExists(int id)
         {
-            return _context.Students.Any(e => e.Id == id);
+            return (_context.Students?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

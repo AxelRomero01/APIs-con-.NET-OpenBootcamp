@@ -1,9 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UniversityApiBackend.DataAccess;
 using UniversityApiBackend.Helpers;
 using UniversityApiBackend.Models.DataModels;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
+using Microsoft.Extensions.Localization;
 
 namespace UniversityApiBackend.Controllers
 {
@@ -44,29 +49,38 @@ namespace UniversityApiBackend.Controllers
             try
             {
                 var Token = new UserTokens();
-                var Valid = Logins.Any(user => user.Name.Equals(userLogin.UserName, StringComparison.OrdinalIgnoreCase));
 
-                if (Valid)
+                //TODO:
+                //Search a user in context with LINQ
+                var searchUser = (from user in _context.Users
+                                  where user.Name == userLogin.UserName && user.Password == userLogin.Password
+                                  select user).FirstOrDefault();
+
+                Console.WriteLine("User Found", searchUser);
+
+                //TODO: Change to searchUser
+                //var Valid = Logins.Any(user => user.Name.Equals(userLogin.UserName, StringComparison.OrdinalIgnoreCase));
+
+
+                if (searchUser != null)
                 {
-                    var user = Logins.FirstOrDefault(user => user.Name
-                    .Equals(userLogin.UserName, StringComparison.OrdinalIgnoreCase));
+                   // var user = Logins.FirstOrDefault(user => user.Name
+                    //.Equals(userLogin.UserName, StringComparison.OrdinalIgnoreCase));
 
                     Token = JwtHelpers.GenTokenKey(new UserTokens()
                     {
-                        UserName = userLogin.UserName,
-                        EmailId = user.Email,
-                        Id = user.Id,
-                        GuidId = Guid.NewGuid()
+                        UserName = searchUser.Name,
+                        EmailId = searchUser.Email,
+                        Id = searchUser.Id,
+                        GuidId = Guid.NewGuid(),
                     }, _jwtsettings);
                 }
                 else
                 {
-                    return BadRequest("Wrong Credentials");
+                    return BadRequest("Wrong Password");
                 }
                 return Ok(Token);
-
-            }
-            catch (Exception ex)
+            }catch (Exception ex)
             {
                 throw new Exception("Error al obtener token", ex);
             }
